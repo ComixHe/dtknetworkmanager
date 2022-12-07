@@ -32,8 +32,10 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX /usr)
 endif ()
 
+set(CMAKE_CXX_FLAGS Release CACHE STRING "define CXXFLAGS")
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    # set(BUILD_TESTING ON)
+    set(BUILD_TESTING ON)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 endif ()
 
@@ -41,13 +43,13 @@ find_package(PkgConfig)
 pkg_search_module(NetworkManager REQUIRED IMPORTED_TARGET libnm>=1.4.0)
 pkg_search_module(Gio REQUIRED IMPORTED_TARGET gio-2.0)
 find_package(DtkCore REQUIRED)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core DBus Network)
 
 add_subdirectory(src)
 
-set(BUILD_DOCS ON CACHE BOOL "Generate doxygen-based documentation")
-find_package(Doxygen)
+# set(BUILD_DOCS ON CACHE BOOL "Generate doxygen-based documentation")
+# find_package(Doxygen)
 if (BUILD_DOCS AND DOXYGEN_FOUND)
     add_subdirectory(docs)
 endif ()

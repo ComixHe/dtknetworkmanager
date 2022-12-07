@@ -27,6 +27,41 @@ DWirelessDeviceInterface::DWirelessDeviceInterface(const QByteArray &path, QObje
     m_wirelessInter = new DDBusInterface(Service, path, Interface, Connection, this);
 }
 
+QList<QDBusObjectPath> DWirelessDeviceInterface::accessPoints() const
+{
+    return qdbus_cast<QList<QDBusObjectPath>>(m_wirelessInter->property("AccessPoints"));
+}
+
+QString DWirelessDeviceInterface::HwAddress() const
+{
+    return qdbus_cast<QString>(m_wirelessInter->property("HwAddress"));
+}
+
+QString DWirelessDeviceInterface::permHwAddress() const
+{
+    return qdbus_cast<QString>(m_wirelessInter->property("PermHwAddress"));
+}
+
+quint32 DWirelessDeviceInterface::mode() const
+{
+    return qdbus_cast<quint32>(m_wirelessInter->property("Mode"));
+}
+
+quint32 DWirelessDeviceInterface::bitrate() const
+{
+    return qdbus_cast<quint32>(m_wirelessInter->property("Bitrate"));
+}
+
+QDBusObjectPath DWirelessDeviceInterface::activeAccessPoint() const
+{
+    return qdbus_cast<QDBusObjectPath>(m_wirelessInter->property("ActiveAccessPoint"));
+}
+
+quint32 DWirelessDeviceInterface::wirelessCapabilities() const
+{
+    return qdbus_cast<quint32>(m_wirelessInter->property("WirelessCapabilities"));
+}
+
 QDBusPendingReply<void> DWirelessDeviceInterface::requestScan(const Config &options) const
 {
     return m_wirelessInter->asyncCallWithArgumentList("RequestScan", {QVariant::fromValue(options)});
