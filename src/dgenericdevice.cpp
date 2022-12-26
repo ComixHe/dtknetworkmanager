@@ -8,18 +8,22 @@ DNETWORKMANAGER_BEGIN_NAMESPACE
 
 DGenericDevicePrivate::DGenericDevicePrivate(const quint64 id, DGenericDevice *parent)
     : DDevicePrivate(id, parent)
+#ifdef USE_FAKE_INTERFACE
+    , m_generic(new DGenericDeviceInterface("/com/deepin/FakeNetworkManager/Devices/" + QByteArray::number(id), this))
+#else
     , m_generic(new DGenericDeviceInterface("/org/freedesktop/NetworkManager/Devices/" + QByteArray::number(id), this))
+#endif
 {
 }
 
 DGenericDevice::DGenericDevice(const quint64 id, QObject *parent)
-    : DDevice(id, parent)
+    : DDevice(*new DGenericDevicePrivate(id, this), parent)
 {
     Q_D(const DGenericDevice);
     connect(d->m_generic, &DGenericDeviceInterface::HwAddressChanged, this, [this](const QString &addr) {
         emit this->HwAddressChanged(addr.toUtf8());
     });
-    connect(d->m_generic, &DGenericDeviceInterface::typeDescriptionChanged, this, &DGenericDevice::typeDescriptionChanged);
+    connect(d->m_generic, &DGenericDeviceInterface::TypeDescriptionChanged, this, &DGenericDevice::typeDescriptionChanged);
 }
 
 QByteArray DGenericDevice::HwAddress() const

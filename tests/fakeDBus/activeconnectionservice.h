@@ -12,8 +12,10 @@ class FakeActiveConncetionService : public QObject
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "com.deepin.FakeNetworkManager.Connection.Active")
 public:
-    explicit FakeActiveConncetionService(QObject *parent = nullptr);
-    virtual ~FakeActiveConncetionService() override;
+    explicit FakeActiveConncetionService(QObject *parent = nullptr)
+        : QObject(parent){};
+
+    virtual ~FakeActiveConncetionService() override = default;
 
     Q_PROPERTY(QList<QDBusObjectPath> Devices READ devices)
     Q_PROPERTY(bool Vpn READ vpn)

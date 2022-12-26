@@ -12,15 +12,19 @@ using DCORE_NAMESPACE::emplace_tag;
 
 DWirelessDevicePrivate::DWirelessDevicePrivate(const quint64 id, DWirelessDevice *parent)
     : DDevicePrivate(id, parent)
+#ifdef USE_FAKE_INTERFACE
+    , m_wireless(new DWirelessDeviceInterface("/com/deepin/FakeNetworkManager/Devices/" + QByteArray::number(id), this))
+#else
     , m_wireless(new DWirelessDeviceInterface("/org/freedesktop/NetworkManager/Devices/" + QByteArray::number(id), this))
+#endif
 {
 }
 
 DWirelessDevice::DWirelessDevice(const quint64 id, QObject *parent)
-    : DDevice(id, parent)
+    : DDevice(*new DWirelessDevicePrivate(id, this), parent)
 {
     Q_D(const DWirelessDevice);
-    connect(d->m_wireless, &DWirelessDeviceInterface::accessPointsChanged, this, [this](const QList<QDBusObjectPath> &aps) {
+    connect(d->m_wireless, &DWirelessDeviceInterface::AccessPointsChanged, this, [this](const QList<QDBusObjectPath> &aps) {
         QList<quint64> ret;
         for (const auto &ap : aps)
             ret.append(getIdFromObjectPath(ap));
@@ -31,24 +35,28 @@ DWirelessDevice::DWirelessDevice(const quint64 id, QObject *parent)
         emit this->HwAddressChanged(address.toUtf8());
     });
 
-    connect(d->m_wireless, &DWirelessDeviceInterface::permHwAddressChanged, this, [this](const QString &address) {
+    connect(d->m_wireless, &DWirelessDeviceInterface::PermHwAddressChanged, this, [this](const QString &address) {
         emit this->permHwAddressChanged(address.toUtf8());
     });
 
-    connect(d->m_wireless, &DWirelessDeviceInterface::modeChanged, this, [this](const quint32 mode) {
+    connect(d->m_wireless, &DWirelessDeviceInterface::ModeChanged, this, [this](const quint32 mode) {
         emit this->modeChanged(static_cast<NM80211Mode>(mode));
     });
 
-    connect(d->m_wireless, &DWirelessDeviceInterface::bitrateChanged, this, &DWirelessDevice::bitrateChanged);
+    connect(d->m_wireless, &DWirelessDeviceInterface::BitrateChanged, this, &DWirelessDevice::bitrateChanged);
 
-    connect(d->m_wireless, &DWirelessDeviceInterface::activeAccessPointChanged, this, [this](const QDBusObjectPath &path) {
+    connect(d->m_wireless, &DWirelessDeviceInterface::ActiveAccessPointChanged, this, [this](const QDBusObjectPath &path) {
         emit this->activeAccessPointChanged(getIdFromObjectPath(path));
     });
 
     connect(
-        d->m_wireless, &DWirelessDeviceInterface::wirelessCapabilitiesChanged, this, [this](const quint32 wirelessCapabilities) {
+        d->m_wireless, &DWirelessDeviceInterface::WirelessCapabilitiesChanged, this, [this](const quint32 wirelessCapabilities) {
             emit this->wirelessCapabilitiesChanged(static_cast<NMWifiCap>(wirelessCapabilities));
         });
+
+    connect(d->m_wireless, &DWirelessDeviceInterface::LastScanChanged, this, [this](const qint64 time) {
+        emit this->lastScanChanged(time);
+    });
 
     connect(d->m_wireless, &DWirelessDeviceInterface::AccessPointAdded, this, [this](const QDBusObjectPath &ap) {
         emit this->AccessPointAdded(getIdFromObjectPath(ap));
@@ -102,6 +110,12 @@ DWirelessDevice::NMWifiCap DWirelessDevice::wirelessCapabilities() const
 {
     Q_D(const DWirelessDevice);
     return static_cast<DWirelessDevice::NMWifiCap>(d->m_wireless->wirelessCapabilities());
+}
+
+qint64 DWirelessDevice::lastScan() const
+{
+    Q_D(const DWirelessDevice);
+    return d->m_wireless->lastScan();
 }
 
 DExpected<void> DWirelessDevice::requestScan(const Config &options) const

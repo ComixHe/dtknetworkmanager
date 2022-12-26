@@ -8,15 +8,19 @@ DNETWORKMANAGER_BEGIN_NAMESPACE
 
 DAdslDevicePrivate::DAdslDevicePrivate(const quint64 id, DAdslDevice *parent)
     : DDevicePrivate(id, parent)
+#ifdef USE_FAKE_INTERFACE
+    , m_adsl(new DAdslDeviceInterface("/com/deepin/FakeNetworkManager/Devices/" + QByteArray::number(id), this))
+#else
     , m_adsl(new DAdslDeviceInterface("/org/freedesktop/NetworkManager/Devices/" + QByteArray::number(id), this))
+#endif
 {
 }
 
 DAdslDevice::DAdslDevice(const quint64 id, QObject *parent)
-    : DDevice(id, parent)
+    : DDevice(*new DAdslDevicePrivate(id, this), parent)
 {
     Q_D(const DAdslDevice);
-    connect(d->m_adsl, &DAdslDeviceInterface::carrierChanged, this, &DAdslDevice::carrierChanged);
+    connect(d->m_adsl, &DAdslDeviceInterface::CarrierChanged, this, &DAdslDevice::carrierChanged);
 }
 
 bool DAdslDevice::carrier() const

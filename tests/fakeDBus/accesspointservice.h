@@ -39,7 +39,7 @@ public:
 private:
     void registerService();
     void unregisterService();
-    const QString Service{"com.deepin.FakeNetworkManager.AccessPoint"};
+    const QString Service{"com.deepin.FakeNetworkManager"};
     const QString Path{"/com/deepin/FakeNetworkManager/AccessPoint/15"};
 };
 

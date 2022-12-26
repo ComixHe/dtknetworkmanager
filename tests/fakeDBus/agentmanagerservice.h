@@ -29,7 +29,7 @@ public slots:
 private:
     void registerService();
     void unregisterService();
-    const QString Service{"com.deepin.FakeNetworkManager.AgentManager"};
+    const QString Service{"com.deepin.FakeNetworkManager"};
     const QString Path{"/com/deepin/FakeNetworkManager/AgentManager"};
 };
 
